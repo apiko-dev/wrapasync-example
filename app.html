@@ -16,5 +16,7 @@
 
     <button class="send">Send</button>
 
-    <h3 class="service-response"></h3>
+    {{#each greeetings}}
+        <h3 class="service-response">{{message}}</h3>
+    {{/each}}
 </template>
