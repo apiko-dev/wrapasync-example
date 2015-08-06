@@ -18,14 +18,16 @@ if (Meteor.isServer) {
 
   Meteor.methods({
     queryExternalService: function (userName) {
-      var onGotDataCb = Meteor.bindEnvironment(function (err, res) {
-        if (err) {
-          console.log(err);
-        } else {
-          GreentingsJournal.insert({message: res, createdAt: new Date()});
-        }
-      });
-      MyExternalEchoService.sayHelloToUser(userName, onGotDataCb);
+      var serviceFunc = MyExternalEchoService.sayHelloToUser;
+
+      var syncServiceFunc = Meteor.wrapAsync(serviceFunc);
+
+      //call our service in synchronous manner
+      var greetingMessage = syncServiceFunc(userName);
+
+      GreentingsJournal.insert({message: greetingMessage, createdAt: new Date()});
+
+      return greetingMessage;
     }
   });
 }
