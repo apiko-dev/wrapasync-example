@@ -3,6 +3,8 @@ GreentingsJournal = new Mongo.Collection('greetings_journal');
 
 //server
 if (Meteor.isServer) {
+
+  //npm package or smart package that wraps npm package
   MyExternalEchoService = {
     sayHelloToUser: function (userName, onResultCb) {
       var processName = function () {
@@ -16,13 +18,14 @@ if (Meteor.isServer) {
 
   Meteor.methods({
     queryExternalService: function (userName) {
-      MyExternalEchoService.sayHelloToUser(userName, function (err, res) {
+      var onGotDataCb = Meteor.bindEnvironment(function (err, res) {
         if (err) {
-          console.log(err)
+          console.log(err);
         } else {
-          GreentingsJournal.insert({message: res})
+          GreentingsJournal.insert({message: res, createdAt: new Date()});
         }
       });
+      MyExternalEchoService.sayHelloToUser(userName, onGotDataCb);
     }
   });
 }
@@ -31,7 +34,7 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
   Template.TestView.helpers({
     greetings: function () {
-      return GreentingsJournal.find();
+      return GreentingsJournal.find({}, {sort: {createdAt: -1}});
     }
   });
 
